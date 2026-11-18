@@ -1,77 +1,84 @@
-#!/usr/bin/env python
-"""
-*******************************************************************************
-*   Ledger Blue
-*   (c) 2016 Ledger
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************
-"""
-from ledgerblue.comm import getDongle
-from ledgerblue.commException import CommException
+#!/usr/bin/env python3
+"""Ledger Blue SSH public-key retrieval."""
+
 import argparse
-import struct
 import base64
+import struct
+
+from ledgerblue.comm import getDongle
+
 
 KEY_HEADER = "ecdsa-sha2-nistp256"
 CURVE_NAME = "nistp256"
 KEY_HEADER_ED25519 = "ssh-ed25519"
 
+
 def parse_bip32_path(path):
-	if len(path) == 0:
-		return ""
-	result = ""
-	elements = path.split('/')
-	for pathElement in elements:
-		element = pathElement.split('\'')
-		if len(element) == 1:
-			result = result + struct.pack(">I", int(element[0]))			
-		else:
-			result = result + struct.pack(">I", 0x80000000 | int(element[0]))
-	return result
+    if not path:
+        return b""
+
+    result = bytearray()
+    for element in path.split("/"):
+        hardened = element.endswith("'")
+        if hardened:
+            element = element[:-1]
+
+        index = int(element)
+        if not 0 <= index < 0x80000000:
+            raise ValueError(f"Invalid BIP32 path element: {element}")
+
+        if hardened:
+            index |= 0x80000000
+
+        result.extend(struct.pack(">I", index))
+
+    return bytes(result)
+
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--path', help="BIP 32 path to retrieve")
-parser.add_argument("--ed25519", help="Use Ed25519 curve", action='store_true')
+parser.add_argument("--path", help="BIP32 path to retrieve")
+parser.add_argument("--ed25519", help="Use Ed25519 curve", action="store_true")
 args = parser.parse_args()
 
-if args.path == None:
-	args.path = "44'/535348'/0'/0/0"
+path = args.path or "44'/535348'/0'/0/0"
+dongle_path = parse_bip32_path(path)
 
 if args.ed25519:
-	p2 = "02"
-	keyHeader = KEY_HEADER_ED25519
+    p2 = "02"
+    key_header = KEY_HEADER_ED25519
 else:
-	p2 = "01" 
-	keyHeader = KEY_HEADER
+    p2 = "01"
+    key_header = KEY_HEADER
 
-donglePath = parse_bip32_path(args.path)
-apdu = "800200" + p2 
-apdu = apdu.decode('hex') + chr(len(donglePath) + 1) + chr(len(donglePath) / 4) + donglePath
+# APDU header, followed by path length/count and the encoded path.
+apdu = (
+    bytes.fromhex("800200" + p2)
+    + bytes((len(dongle_path) + 1, len(dongle_path) // 4))
+    + dongle_path
+)
 
 dongle = getDongle(True)
-result = dongle.exchange(bytes(apdu))
-key = str(result[1:])
-blob = struct.pack(">I", len(KEY_HEADER)) + keyHeader 
+result = dongle.exchange(apdu)
+key = result[1:]
+
+key_header_bytes = key_header.encode("ascii")
+blob = struct.pack(">I", len(key_header_bytes)) + key_header_bytes
+
 if args.ed25519:
-	keyX = bytearray(key[0:32])
-	keyY = bytearray(key[32:][::-1])
-	if ((keyX[31] & 1)<>0):
-		keyY[31] |= 0x80
-	key = str(keyY)
+    if len(key) < 64:
+        raise ValueError(f"Expected at least 64 key bytes, got {len(key)}")
+
+    key_x = key[:32]
+    key_y = bytearray(key[32:64][::-1])
+
+    if key_x[31] & 1:
+        key_y[31] |= 0x80
+
+    key = bytes(key_y)
 else:
-	blob += struct.pack(">I", len(CURVE_NAME)) + CURVE_NAME
-	
+    curve_name_bytes = CURVE_NAME.encode("ascii")
+    blob += struct.pack(">I", len(curve_name_bytes)) + curve_name_bytes
+
 blob += struct.pack(">I", len(key)) + key
-print keyHeader + " " + base64.b64encode(blob)
+print(key_header + " " + base64.b64encode(blob).decode("ascii"))
 
