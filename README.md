@@ -91,7 +91,7 @@ Install *dependencies:*
 ```bash
 sudo apt-get install python3
 sudo apt-get install libusb-1.0-0-dev
-sudo apt install usbutils
+sudo apt-get install usbutils
 ```
 
 Create and activate a ***virtual environment**.*
@@ -113,7 +113,7 @@ In this *example,* we will *clone* it into the *home directory:*
 
 ```bash
 git clone https://github.com/ricky-i2p/ledger-app-ssh-agent.git
-cd app-ssh-agent/
+cd ledger-app-ssh-agent/
 ```
 
 Now we will *generate* our ***public key*** from the *Ledger* and `print` it out on the *terminal:*
