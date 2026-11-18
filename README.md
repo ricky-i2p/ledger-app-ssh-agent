@@ -32,9 +32,27 @@ Run and install based upon which ***CPU*** the system has:
 > * ***usbipd-win_5.3.0_arm64.msi***
 > * ***usbipd-win_5.3.0_x64.msi***
 
-Open ***PowerShell*** and run the command:
+Open ***PowerShell*** as an *administrator* and run the command:
 
 ```powershell
+usbipd list
+```
+
+#### Sample output:
+
+```powershell
+BUSID  VID:PID        DEVICE                                                        STATE
+1-1    <XXXX>:<AAAA>  USB Input Device                                              Not shared
+1-3    <YYYY>:<BBBB>  USB Input Device, Nano X                                      Not shared
+1-4    <ZZZZ>:<CCCC>  USB Input Device                                              Not shared
+```
+
+> We must activate **`STATE`** on the *Ledger* device from ***`'Not shared'`*** to ***`'Shared'`**.*
+
+Grab the **`<BUSID>`**. In this *example,* it is ***`'1-3'`**:*
+
+```powershell
+usbipd bind --busid 1-3
 usbipd list
 ```
 
@@ -47,12 +65,11 @@ BUSID  VID:PID        DEVICE                                                    
 1-4    <ZZZZ>:<CCCC>  USB Input Device                                              Not shared
 ```
 
-> We must activate **`STATE`** on the *Ledger* device from ***`'Not shared'`*** or ***`'Shared'`*** to ***`'Attached'`**.*
+>Now we must activate **`STATE`** on the *Ledger* device from ***`'Shared'`*** to ***`'Attached'`**.*
 
-Grab the **`<BUSID>`**. In this *example,* it is ***`'1-3'`**:*
+Use the same **`<BUSID>`** again:
 
 ```powershell
-usbipd bind --busid 1-3
 usbipd attach --wsl --busid 1-3
 ```
 
@@ -61,7 +78,7 @@ usbipd attach --wsl --busid 1-3
 ```powershell
 usbipd: info: Using WSL distribution 'Ubuntu' to attach; the device will be available in all WSL 2 distributions.
 usbipd: info: Detected networking mode 'nat'.
-usbipd: info: Using IP address XXX.XX.XX.X to reach the host.
+usbipd: info: Using IP address <XXX.XX.XX.X> to reach the host.
 ```
 
 Now, run *` usbipd list `* again to confirm the **`STATE`** of the *Ledger* device is ***`'Attached'`**:*
@@ -235,15 +252,24 @@ While attached, *Windows* can’t use the *Ledger*, so detach it from ***PowerSh
 
 ## Windows:
 
-In ***PowerShell***, run the command:
+In ***PowerShell*** as an *administrator*, run the commands:
 
 ```powershell
 usbipd detach --busid <BUSID>
+usbipd unbind --busid <BUSID>
+usbipd list
 ```
 
+#### Sample output:
 
+```powershell
+BUSID  VID:PID        DEVICE                                                        STATE
+1-1    <XXXX>:<AAAA>  USB Input Device                                              Not shared
+1-3    <YYYY>:<BBBB>  USB Input Device, Nano X                                      Not shared
+1-4    <ZZZZ>:<CCCC>  USB Input Device                                              Not shared
+```
 
-
+> Now the *Ledger* device will work with ***Ledger Live*** and other *supported* applications within *Windows.*
 
 ## Donate:
 
