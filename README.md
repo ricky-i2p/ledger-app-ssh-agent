@@ -112,7 +112,7 @@ pip3 install ledger_agent
 In this *example,* we will *clone* it into the *home directory:*
 
 ```bash
-git clone https://github.com/ricky-i2p/app-ssh-agent.git
+git clone https://github.com/ricky-i2p/ledger-app-ssh-agent.git
 cd app-ssh-agent/
 ```
 
