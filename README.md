@@ -47,7 +47,7 @@ BUSID  VID:PID        DEVICE                                                    
 1-4    <ZZZZ>:<CCCC>  USB Input Device                                              Not shared
 ```
 
-> We must activate **`STATE`** on the *Ledger* device from ***`'Not shared'`*** to ***`'Shared'`**.*
+> We must activate **`STATE`** on the *Ledger* device from ***`'Not shared'`*** or ***`'Shared'`*** to ***`'Attached'`**.*
 
 Grab the **`<BUSID>`**. In this *example,* it is ***`'1-3'`**:*
 
@@ -64,7 +64,7 @@ usbipd: info: Detected networking mode 'nat'.
 usbipd: info: Using IP address XXX.XX.XX.X to reach the host.
 ```
 
-Now, run *` usbipd list `* again to confirm the **`STATE`** of the *Ledger* device is ***`'Shared'`**:*
+Now, run *` usbipd list `* again to confirm the **`STATE`** of the *Ledger* device is ***`'Attached'`**:*
 
 ```powershell
 usbipd list
