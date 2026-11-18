@@ -243,7 +243,7 @@ On the *Ledger*, confirm ***'Connect SSH user &lt;USER&gt;'**.*
 
 
 ------------------------------------------------------------------------------------------------------
-**Ta-da**, *success!* We can now ***'Ctrl + C'*** or close out of the terminal running ***agent.py**.*
+**Ta-da**, *success!* We can now ***'Ctrl + C'*** or close out of the terminal running ***`agent.py`**.*
 
 When done, if using *Windows* we must detach the *Ledger* from **WSL** so we can use it normally again on *Windows.*
 While attached, *Windows* can’t use the *Ledger*, so detach it from ***PowerShell*** when done.
