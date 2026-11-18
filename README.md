@@ -43,7 +43,7 @@ usbipd list
 ```powershell
 BUSID  VID:PID        DEVICE                                                        STATE
 1-1    <XXXX>:<AAAA>  USB Input Device                                              Not shared
-1-3    <YYYY>:<BBBB>  USB Input Device, Nano X                                      Not shared
+1-3    <YYYY>:<BBBB>  USB Input Device, Nano X                                      Shared
 1-4    <ZZZZ>:<CCCC>  USB Input Device                                              Not shared
 ```
 
